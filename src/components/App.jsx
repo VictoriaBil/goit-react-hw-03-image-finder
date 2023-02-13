@@ -62,17 +62,24 @@ export default class App extends Component {
 
   render() {
     return (
-      <div className={css.App}>
-        <Searchbar onSubmit={this.searchResult} />
-        {this.state.showModal && (
-          <Modal imgUrl={this.state.largeImageUrl} onClose={this.toggleModal} />
-        )}
-        <ImageGallery
-          pictures={this.state.pictures}
-          onClick={this.getLargeImgUrl}
-        />
-        {this.state.status === 'loading' && <Loader />}
-        {this.state.loadMore === 0 && <Button onClick={this.handleLoadMore} />}
+      <div className={css.Container}>
+        <div className={css.App}>
+          <Searchbar onSubmit={this.searchResult} />
+          {this.state.showModal && (
+            <Modal
+              imgUrl={this.state.largeImageUrl}
+              onClose={this.toggleModal}
+            />
+          )}
+          <ImageGallery
+            pictures={this.state.pictures}
+            onClick={this.getLargeImgUrl}
+          />
+          {this.state.status === 'loading' && <Loader />}
+          {this.state.loadMore === 0 && (
+            <Button onClick={this.handleLoadMore} />
+          )}
+        </div>
       </div>
     );
   }

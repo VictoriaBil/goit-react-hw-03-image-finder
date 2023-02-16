@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import css from './ImageGalleryItem.module.css';
 
 export const ImageGalleryItem = ({ pictures, onClickImg }) => {
-  return pictures.map((picture, index) => {
+  return pictures.map(picture => {
     return (
-      <div className={css.imageGalleryItem} key={index}>
+      <div className={css.imageGalleryItem} key={picture.id}>
         <img
           onClick={() => {
             onClickImg(picture.largeImageURL);
@@ -21,6 +21,7 @@ export const ImageGalleryItem = ({ pictures, onClickImg }) => {
 ImageGalleryItem.propTypes = {
   pictures: PropTypes.arrayOf(
     PropTypes.shape({
+      id: PropTypes.number.isRequired,
       largeImageURL: PropTypes.string.isRequired,
       webformatURL: PropTypes.string.isRequired,
       tags: PropTypes.string.isRequired,

@@ -14,9 +14,10 @@ export default class App extends Component {
     showModal: false,
     largeImageUrl: '',
     page: 1,
-    per_page: 12,
     query: '',
-    loadMore: 0,
+    error: '',
+    isLoading: false,
+    total: 0,
   };
 
   getLargeImgUrl = imgUrl => {
@@ -41,55 +42,58 @@ export default class App extends Component {
       alert('Please write something');
       return;
     } else {
-      this.setState({ query: value, page: 1, pictures: [], loadMore: null });
+      this.setState({ query: value, page: 1, pictures: [] });
     }
   };
 
   async componentDidUpdate(_, prevState) {
-    const { page, query, per_page, loadMore } = this.state;
+    const { page, query, total } = this.state;
+
     if (prevState.query !== query || prevState.page !== page) {
       try {
-        this.setState({ status: 'pending' });
-        const data = await fetchPictures(query, page, per_page);
-        this.setState(({ pictures }) => ({
-          pictures: [...pictures, ...data.hits],
-          status: 'resolved',
-          loadMore: Math.ceil(data.totalHits / per_page),
-        }));
-      } catch (error) {
-        alert('Sorry, try again');
         this.setState({
-          status: 'rejected',
+          isLoading: true,
         });
-      }
-      if (loadMore === page) {
-        alert(`We're sorry, but you've reached the end of search`);
+
+        await fetchPictures(query, page, total).then(data => {
+          if (data.hits.length) {
+            this.setState(({ pictures }) => ({
+              pictures: [...pictures, ...data.hits],
+              total: data.totalHits,
+              isLoading: false,
+            }));
+          } else {
+            alert(
+              "Sorry we can't find anyting for your request. Please enter another request"
+            );
+          }
+        });
+      } catch (error) {
+        this.setState({ error });
+      } finally {
         this.setState({
-          status: 'idle',
+          isLoading: false,
         });
       }
     }
   }
 
   render() {
+    const { pictures, showModal, isLoading, total, largeImageUrl, error } =
+      this.state;
+    const totalPage = pictures.length / total;
+
     return (
       <div className={css.Container}>
         <div className={css.App}>
           <Searchbar onSubmit={this.searchResult} />
-          {this.state.showModal && (
-            <Modal
-              imgUrl={this.state.largeImageUrl}
-              onClose={this.toggleModal}
-            />
+          {error && <p>Something went wrong. Please refresh the page</p>}
+          {isLoading && <Loader />}
+          {showModal && (
+            <Modal imgUrl={largeImageUrl} onClose={this.toggleModal} />
           )}
-          <ImageGallery
-            pictures={this.state.pictures}
-            onClick={this.getLargeImgUrl}
-          />
-          {this.state.status === 'pending' && <Loader />}
-          {this.state.status === 'resolved' && this.state.loadMore > 1 && (
-            <Button onClick={this.handleLoadMore} />
-          )}
+          <ImageGallery pictures={pictures} onClick={this.getLargeImgUrl} />
+          {totalPage < 1 && <Button onClick={this.handleLoadMore} />}
         </div>
       </div>
     );

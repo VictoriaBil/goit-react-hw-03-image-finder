@@ -10,7 +10,6 @@ import css from './App.module.css';
 export default class App extends Component {
   state = {
     pictures: [],
-    status: 'idle',
     showModal: false,
     largeImageUrl: '',
     page: 1,
